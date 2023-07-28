@@ -1,0 +1,119 @@
+import axios from "axios";
+import fs from "fs-extra";
+import fetch from "node-fetch";
+import { writeFileSync } from 'fs';
+import { join } from 'path';
+import moment from "moment-timezone";
+
+const config = {
+  name: "ارسمي",
+  aliases: ["ارسم"],
+  description: "رسم بالذكاء الصناعي",
+  usage: "نص ما تريد رسمه",
+  cooldown: 10,
+  permissions: [0, 1, 2],
+  isAbsolute: false,
+  isHidden: false,
+  credits: "IbrahemVX2000",
+};
+
+async function onCall({ message, args, getLang, extra, data, userPermissions, prefix }) {
+  const { threadID, messageID, body, senderID } = message;
+  const { Users, Threads } = global.controllers;
+try {
+  let senderid = message.senderID;
+  let sender = await Users.getInfo(senderid);
+  let senderName = sender.name;
+  let senderGender = sender.gender;
+  let Gender = senderGender === "MALE" ? "قام" : "قامت";
+
+  const keys = [
+    "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",
+    "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",
+    "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"
+  ];
+  const num00 = keys[Math.floor(Math.random() * keys.length)];
+
+ async function query(data) {
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/kandinsky-community/kandinsky-2-1",
+      {
+        headers: { Authorization: `Bearer ${num00}` },
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
+    const imageBuffer = await response.arrayBuffer(); 
+    return imageBuffer;
+  }
+
+  // const keys0 = [
+  //   "https://api-inference.huggingface.co/models/daspartho/prompt-extend",
+  //   "https://api-inference.huggingface.co/models/AUTOMATIC/promptgen-lexart",
+  //   "https://api-inference.huggingface.co/models/succinctly/text2image-prompt-generator",
+  //   "https://api-inference.huggingface.co/models/Ar4ikov/gpt2-medium-650k-stable-diffusion-prompt-generator",
+  //   "https://api-inference.huggingface.co/models/RamAnanth1/distilgpt2-sd-prompts"
+  // ];
+  // const num001 = keys0[Math.floor(Math.random() * keys0.length)];
+
+  // async function gen(data) {
+  //   const response = await fetch(num001, {
+  //     headers: { Authorization: "Bearer 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" },
+  //     method: "POST",
+  //     body: JSON.stringify(data),
+  //   });
+  //   const result = await response.json();
+  //   return result;
+  // }
+
+  const translatedInput = await translate(body, "ar", "en");
+  let prompt = translatedInput.slice(5, translatedInput.length) + ",4k photo";
+  message.react("⚙");
+
+  console.log('\x1b[93m%s\x1b[0m',`the user who has id ${senderid} and name ${senderName} created: `,`\x1b[35m${prompt}\x1b[0m`);
+
+  const selected = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  const num = selected[Math.floor(Math.random() * selected.length)];
+  const num2 = selected[Math.floor(Math.random() * selected.length)];
+  const num3 = selected[Math.floor(Math.random() * selected.length)];
+
+  async function generateImage() {
+  const inputText = prompt;
+     const imageBuffer = await query({ "inputs": inputText });
+    const imagePath = `${global.cachePath}/dr${num2}aw${num}in${Date.now()}g1.png`;
+
+    await fs.writeFile(imagePath, Buffer.from(imageBuffer));
+    console.log('\x1b[96m%s\x1b[0m', `Image saved successfully for the peompt ${prompt} in the path:`, imagePath);
+
+    const stream = fs.createReadStream(imagePath);
+    
+      const currentTime = moment().tz("Asia/Riyadh").format("hh:mm A");
+      const currentDate = moment().tz("Asia/Riyadh").format("YYYY-MM-DD");
+    message.react("✔");
+      message.reply({
+        body: `${Gender} ${senderName} برسم:\n❰ ${body.slice(5, body.length)} ❱\nبتاريخ:${currentDate}\nالساعة:${currentTime}`,
+        attachment: stream
+      });
+      setTimeout(async () => {
+        await fs.unlink(imagePath);
+      }, 10000);
+}
+
+
+  await generateImage();
+  } catch (error) {
+      message.react("❌");
+    }
+}
+
+async function translate(text, sourceLang, targetLang) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const res = await global.GET(url);
+  const translation = res.data[0].map((item) => item[0]).join("");
+  return translation;
+}
+
+export default {
+  config,
+  onCall
+};

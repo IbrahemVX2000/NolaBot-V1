@@ -1,0 +1,27 @@
+import axios from "axios";
+const config = {
+    name: "test",
+    aliases: [],
+    description: "",
+    usage: "[]",
+    cooldown: 3,
+    permissions: [2],
+    isAbsolute: true,
+    isHidden: true,
+    credits: "IbrahemVX2000",
+    
+}
+
+
+async function onCall({ message, args, getLang, extra, data, userPermissions, prefix }) {
+  try{
+    const { mentions, messageReply, senderID } = message;
+    
+  } catch(e){
+    await global.customLog(e,"ERROR","error");
+  }
+}
+export default {
+    config,
+    onCall
+}

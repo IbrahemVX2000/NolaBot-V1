@@ -1,0 +1,40 @@
+const config = {
+  name: "test",
+  aliases: [],
+  cooldown: 20,
+  credits: "IbrahemVX2000",
+};
+
+async function onCall({ message, args, getLang, extra, data, userPermissions, prefix }) {
+  try {
+    const txt = "hi";
+    const rep = await message.reply(txt);
+    // let arr=["H"]
+    let arr ={arr: "n"}
+    // Add reply event to listen for user response
+    rep.addReplyEvent({callback:onReply,arr});
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function onReply({ message ,eventData}) {
+  // const { arr } = eventData;
+  console.log(eventData.arr)
+  // Check if the user replied with the expected response "H"
+  if (message.body === "H") {
+    // Send a message indicating that the user replied "H"
+    message.reply("You replied with 'H'");
+  } else {
+    // User didn't reply with the expected response
+    message.reply("You didn't reply with the expected response 'H'");
+  }
+}
+
+export default {
+  config,
+  onCall,
+};
+
+/* الفكرة ان الهاندل ريبلاي بدائي يستقبل رد على الرساله المعنيه والتي هي بالكود rep ثم يعيد نتيجة باستخدام callback والي ضروري تكون دالة ولايمكن تمرير البيانات بشكل مباشر الى الدالة المستخدمه في الcallback الحل الوحيد هو ارسالها كمصفوفه او ككائن 
+الدالة تستمر بالعمل على الرساله الاولى فقط بمعنى انها لا تتغير مع الرساله الحديثه (لايمكن استخدامها لانشاء محادثه كمثال) */
